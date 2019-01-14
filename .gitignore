@@ -15,3 +15,6 @@ TLS3001_pigpio/gcc_Release.h
 TLS3001_pigpio/TLS3001_pigpio.vcxproj.filters
 TLS3001_pigpio/TLS3001_pigpio.vcxproj
 TLS3001_pigpio/gcc_Debug.h
+TLS3001_pigpio/VisualGDBCache/TLS3001_pigpio-Debug/SourceCache.dat
+TLS3001_pigpio/Debug/TLS3001_pigpio.vcxprojResolveAssemblyReference.cache
+TLS3001_pigpio/Debug/TLS3001_pigpio.log
