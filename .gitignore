@@ -1,2 +1,17 @@
 CodeDB/
 .vs/
+TLS3001_pigpio/release.mak
+TLS3001_pigpio/debug.mak
+TLS3001_pigpio/TLS3001_pigpio.vcxproj.user
+TLS3001_pigpio/TLS3001_pigpio-Release.vgdbsettings
+TLS3001_pigpio/TLS3001_pigpio-Debug.vgdbsettings.mikae.user
+TLS3001_pigpio/TLS3001_pigpio-Debug.vgdbsettings
+TLS3001_pigpio/Makefile.old
+TLS3001_pigpio/Makefile
+TLS3001_pigpio.sln
+TLS3001_pigpio/debug.mak.old
+TLS3001_pigpio/TLS3001_pigpio-Debug.vgdbsettings.pluspole.user
+TLS3001_pigpio/gcc_Release.h
+TLS3001_pigpio/TLS3001_pigpio.vcxproj.filters
+TLS3001_pigpio/TLS3001_pigpio.vcxproj
+TLS3001_pigpio/gcc_Debug.h
