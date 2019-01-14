@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include "stdarg.h"
+#include "string.h"
 	
 #define TLS3001_GPIO 25
 #define PIXELS 10
@@ -13,6 +14,11 @@
 #define MANCH_BIT_1 {{ 1 << TLS3001_GPIO, 0, T1 }, { 0, 1 << TLS3001_GPIO, T0 }} 
 #define MANCH_BIT_0 {{ 0, 1 << TLS3001_GPIO, T0 }, { 1 << TLS3001_GPIO, 0, T1 }}
 
+
+#define p1 		{ 1 << TLS3001_GPIO, 0, 20 },
+#define p2		{ 0, 1 << TLS3001_GPIO, 40 },
+#define p3		{ 1 << TLS3001_GPIO, 0, 10 },
+#define p4		{ 0, 1 << TLS3001_GPIO, 100 },
 
 typedef struct
 {
@@ -50,7 +56,7 @@ static void _make_bitwaves(manch_message_wave *self)
 	Generates the basic waveforms needed to transmit codes.
 	*/
 
-	gpioPulse_t pulse[(self->num_bits) * 2];
+	gpioPulse_t pulse_array[(self->num_bits) * 2];
 	
 	//memset(&pulse, sizeof(pulse), 0);// clear full struct
 	
@@ -60,7 +66,6 @@ static void _make_bitwaves(manch_message_wave *self)
 			
 	bit = ((uint32_t)1 << (self->num_bits - 1));
 
-	gpioSetMode(manch_bit_wave.gpio, PI_OUTPUT);
 	gpioWaveClear();
 	
 	for (i = 0; i < (self->num_bits*2); (i=i+2))
@@ -68,42 +73,31 @@ static void _make_bitwaves(manch_message_wave *self)
 		if (self->message & bit) 
 		{
 			//If bit == 1
-			/*
-			pulse[i].gpioOn = 1 << manch_bit_wave.gpio;
-			pulse[i].gpioOff = 0;
-			pulse[i].usDelay = manch_bit_wave.t1;
+			pulse_array[i].gpioOn = 1 << manch_bit_wave.gpio;
+			pulse_array[i].gpioOff = 0;
+			pulse_array[i].usDelay = manch_bit_wave.t1;
 			
-			pulse[i+1].gpioOn = 0;
-			pulse[i+1].gpioOff = 1 << manch_bit_wave.gpio;
-			pulse[i+1].usDelay = manch_bit_wave.t0;
-			*/
-			pulses += gpioWaveAddGeneric(2,(gpioPulse_t[])
-					{ { 1 << manch_bit_wave.gpio, 0, (manch_bit_wave.t1) }, { 0, 1 << manch_bit_wave.gpio, (manch_bit_wave.t0) } });
-			//pulses += gpioWaveAddGeneric(2, (gpioPulse_t[]) MANCH_BIT_1);
+			pulse_array[i+1].gpioOn = 0;
+			pulse_array[i+1].gpioOff = 1 << manch_bit_wave.gpio;
+			pulse_array[i+1].usDelay = manch_bit_wave.t0;
+		
 		}
 		else 
 		{
 			//if bit == 0
-			/*
-			pulse[i].gpioOn = 0;
-			pulse[i].gpioOff = 1 << manch_bit_wave.gpio;
-			pulse[i].usDelay = manch_bit_wave.t1;
+			pulse_array[i].gpioOn = 0;
+			pulse_array[i].gpioOff = 1 << manch_bit_wave.gpio;
+			pulse_array[i].usDelay = manch_bit_wave.t0;
 			
-			pulse[i + 1].gpioOn = 1 << manch_bit_wave.gpio;
-			pulse[i + 1].gpioOff = 0;
-			pulse[i + 1].usDelay = manch_bit_wave.t0;
-			*/
-			
-			pulses += gpioWaveAddGeneric(2,(gpioPulse_t[])
-					{ { 0, 1 << manch_bit_wave.gpio, (manch_bit_wave.t0) }, { 1 << manch_bit_wave.gpio, 0, (manch_bit_wave.t1) } });
-			//pulses += gpioWaveAddGeneric(2, (gpioPulse_t[]) MANCH_BIT_0);
+			pulse_array[i + 1].gpioOn = 1 << manch_bit_wave.gpio;
+			pulse_array[i + 1].gpioOff = 0;
+			pulse_array[i + 1].usDelay = manch_bit_wave.t1;
 		}
 		bit >>= 1;
-		//t_off += 1;
-	
+
 	}
 	
-	//pulses = gpioWaveAddGeneric((self->num_bits) * 2, pulse);
+	pulses = gpioWaveAddGeneric((self->num_bits) * 2, pulse_array);
 	micros = gpioWaveGetMicros();
 	
 	if (pulses == (self->num_bits * 2))
@@ -145,6 +139,9 @@ int main(int argc, char *argv[])
 	fflush(stdout); /* <============== Put a breakpoint here */
 
 	uint16_t i, pulses, micros;
+	uint32_t bit;
+	
+	pulses = 0;
 	
 	gpioInitialise();
 	
@@ -152,26 +149,32 @@ int main(int argc, char *argv[])
 	manch_bit_wave.t0 = 3;
 	manch_bit_wave.gpio = TLS3001_GPIO;
 	
+	gpioSetMode(manch_bit_wave.gpio, PI_OUTPUT);
+	
+	//-----------------------------------
+	
+
+	/*
 	gpioPulse_t wf[] =
 	{
-		{ 1 << TLS3001_GPIO, 0, 1 },
-		{ 0, 1 << TLS3001_GPIO, 3 },
-		{ 1 << TLS3001_GPIO, 0, 6 },
-		{ 0, 1 << TLS3001_GPIO, 10 },
+		{ 1 << TLS3001_GPIO, 0, 20 },
+		{ 0, 1 << TLS3001_GPIO, 40 },
+		{ 1 << TLS3001_GPIO, 0, 10 },
+		{ 0, 1 << TLS3001_GPIO, 100 },
 	};
-	
+
 	gpioSetMode(manch_bit_wave.gpio, PI_OUTPUT);
 
 	gpioWaveClear();
-	
-	//gpioWaveAddNew();
 	
 	pulses = gpioWaveAddGeneric(4, wf);
 	micros = gpioWaveGetMicros();
 	
 	test1.wave_id = gpioWaveCreate();
+	*/
+	//-----------------------------------
 	
-	_make_bitwaves(&test1);
+	_make_bitwaves(&message_resetdata);
 	//_make_bitwaves(&message_resetdata);
 	//_make_bitwaves(&message_syncdata);
 	//_make_bitwaves(&message_startdata);
@@ -194,14 +197,14 @@ int main(int argc, char *argv[])
 	
 	//_combine_chains((1 + PIXELS), &message_pixel_colors[0])
 	
-	
+	/*
 	while (1)
 	{
 
 		//tx_send(&);
 		
 
-		gpioWaveTxSend(test1.wave_id, PI_WAVE_MODE_REPEAT_SYNC);
+		gpioWaveTxSend(test1.wave_id, PI_WAVE_MODE_ONE_SHOT);
 
 		// Transmit for 30 seconds.
 
@@ -211,8 +214,12 @@ int main(int argc, char *argv[])
 
 		time_sleep(0.5);
 		
-	}
-
+	}*/
+	gpioWaveTxSend(message_resetdata.wave_id, PI_WAVE_MODE_ONE_SHOT);
+	
+	while (gpioWaveTxBusy()) time_sleep(0.1);
+	
+	gpioTerminate();
 	
 	return 0;
 }
